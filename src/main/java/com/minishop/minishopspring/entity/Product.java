@@ -1,9 +1,6 @@
 package com.minishop.minishopspring.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,6 +18,9 @@ public class Product {
     private String name;
     private BigDecimal price;
     private Integer quantity;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     public Product(BigDecimal price, String name, Integer quantity) {
         this.price = price;

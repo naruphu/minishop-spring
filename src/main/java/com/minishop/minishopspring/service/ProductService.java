@@ -2,11 +2,17 @@ package com.minishop.minishopspring.service;
 
 import com.minishop.minishopspring.dto.ProductRequestDTO;
 import com.minishop.minishopspring.dto.ProductResponseDTO;
+import com.minishop.minishopspring.entity.Category;
 import com.minishop.minishopspring.entity.Product;
+import com.minishop.minishopspring.exception.CategoryNotFoundException;
 import com.minishop.minishopspring.exception.ProductNotFoundException;
 import com.minishop.minishopspring.mapper.ProductMapper;
+import com.minishop.minishopspring.repository.CategoryRepository;
 import com.minishop.minishopspring.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +22,8 @@ import java.util.List;
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
+    private final CategoryRepository categoryRepository;
+
 
 
 
@@ -42,6 +50,15 @@ public class ProductService {
     public ProductResponseDTO create(ProductRequestDTO request){
         Product product = productMapper.toEntity(request);
 
+        Category category =
+                categoryRepository.findById(request.getCategoryId())
+                        .orElseThrow(() ->
+                                new CategoryNotFoundException(
+                                        "Category not found"
+                                )
+                        );
+
+        product.setCategory(category);
         Product savedProduct = productRepository.save(product);
 
         return productMapper.toDTO(savedProduct);
@@ -80,4 +97,48 @@ public class ProductService {
 
         productRepository.delete(product);
     }
+
+    public Page<ProductResponseDTO> getProduct(int page, int size, String keyword, Integer categoryId){
+        Page<Product> products;
+        Pageable pageable = PageRequest.of(page, size);
+
+        if((keyword != null && !keyword.trim().isEmpty()) && categoryId != null){
+
+            products = productRepository
+                    .findByNameContainingIgnoreCaseAndCategory_Id(
+                            keyword,
+                            categoryId,
+                            pageable
+                    );
+
+        }
+        else if(keyword != null && !keyword.trim().isEmpty()){
+
+            products = productRepository
+                    .findByNameContainingIgnoreCase(
+                            keyword,
+                            pageable
+                    );
+
+        }
+        else if(categoryId != null){
+
+            products = productRepository
+                    .findByCategory_Id(
+                            categoryId,
+                            pageable
+                    );
+
+        }
+        else{
+
+            products = productRepository.findAll(pageable);
+
+        }
+
+
+        return products.map(productMapper::toDTO);
+
+    }
+
 }
