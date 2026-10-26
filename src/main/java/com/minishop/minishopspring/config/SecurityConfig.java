@@ -40,6 +40,11 @@ public class SecurityConfig {
                                         "/users/login"
                                 ).permitAll()
 
+                                .requestMatchers(
+                                        "/users",
+                                        "/users/**"
+                                ).hasRole("ADMIN")
+
                                 // Chỉ ADMIN được tạo product
                                 .requestMatchers(
                                         HttpMethod.POST,
@@ -67,6 +72,21 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         HttpMethod.PUT,
                                         "/orders/*/status"
+                                ).hasRole("ADMIN")
+
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/categories"
+                                ).hasRole("ADMIN")
+
+                                .requestMatchers(
+                                        HttpMethod.PUT,
+                                        "/categories/**"
+                                ).hasRole("ADMIN")
+
+                                .requestMatchers(
+                                        HttpMethod.DELETE,
+                                        "/categories/**"
                                 ).hasRole("ADMIN")
 
                                 .anyRequest()
