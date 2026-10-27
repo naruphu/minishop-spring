@@ -7,6 +7,7 @@ import com.minishop.minishopspring.dto.UserResponseDTO;
 import com.minishop.minishopspring.entity.User;
 import com.minishop.minishopspring.enums.Role;
 import com.minishop.minishopspring.exception.InvalidCredentialsException;
+import com.minishop.minishopspring.exception.UserAlreadyExistsException;
 import com.minishop.minishopspring.exception.UserNotFoundException;
 import com.minishop.minishopspring.mapper.UserMapper;
 import com.minishop.minishopspring.repository.UserRepository;
@@ -52,6 +53,13 @@ public class UserService {
 
     // REGISTER
     public UserResponseDTO register(UserRegisterRequestDTO request) {
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new UserAlreadyExistsException("Username already existed");
+        }
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new UserAlreadyExistsException("Email already existed");
+        }
 
         User user = userMapper.toEntity(request);
 
