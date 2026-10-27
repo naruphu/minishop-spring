@@ -76,11 +76,20 @@ public class ProductService {
                                 "Product not found with id: " + id
                         )
                 );
+        Category category = categoryRepository
+                .findById(request.getCategoryId())
+                .orElseThrow(() ->
+                        new CategoryNotFoundException(
+                                "Category not found with id: "
+                                        + request.getCategoryId()
+                        )
+                );
 
 
         oldProduct.setName(request.getName());
         oldProduct.setPrice(request.getPrice());
         oldProduct.setQuantity(request.getQuantity());
+        oldProduct.setCategory(category);
 
         Product updatedProduct = productRepository.save(oldProduct);
 
