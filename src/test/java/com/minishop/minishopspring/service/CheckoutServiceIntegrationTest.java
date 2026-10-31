@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 class CheckoutServiceIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private CheckoutService checkoutService;
@@ -80,6 +82,7 @@ class CheckoutServiceIntegrationTest extends BaseIntegrationTest {
         OrderResponseDTO response =
                 checkoutService.checkout();
 
+        entityManager.flush();
         entityManager.clear();
 
 

@@ -21,6 +21,8 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
+    @Column(nullable = false)
+    private Boolean active = true;
 
     public Product(BigDecimal price, String name, Integer quantity) {
         this.price = price;

@@ -8,6 +8,7 @@ import com.minishop.minishopspring.mapper.OrderMapper;
 import com.minishop.minishopspring.repository.CartItemRepository;
 import com.minishop.minishopspring.repository.OrderRepository;
 
+import com.minishop.minishopspring.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -18,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -38,6 +40,9 @@ class CheckoutServiceTest {
 
     @Mock
     private CurrentUserService currentUserService;
+
+    @Mock
+    private ProductRepository productRepository;
 
     @InjectMocks
     private CheckoutService checkoutService;
@@ -90,6 +95,9 @@ class CheckoutServiceTest {
         when(cartItemRepository.findByUserId(1L))
                 .thenReturn(List.of(cartItem));
 
+        when(productRepository.findByIdForUpdate(product.getId()))
+                .thenReturn(Optional.of(product));
+
 
         // ACT + ASSERT
         assertThrows(
@@ -133,6 +141,8 @@ class CheckoutServiceTest {
         when(cartItemRepository.findByUserId(1L))
                 .thenReturn(List.of(cartItem));
 
+        when(productRepository.findByIdForUpdate(product.getId()))
+                .thenReturn(Optional.of(product));
 
         // Khi save bất kỳ Order nào
         // → trả lại chính Order được truyền vào

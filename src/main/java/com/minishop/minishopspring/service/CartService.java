@@ -9,13 +9,11 @@ import com.minishop.minishopspring.entity.Product;
 import com.minishop.minishopspring.entity.User;
 import com.minishop.minishopspring.exception.CartException;
 import com.minishop.minishopspring.exception.ProductNotFoundException;
-import com.minishop.minishopspring.exception.UserNotFoundException;
 import com.minishop.minishopspring.repository.CartItemRepository;
 import com.minishop.minishopspring.repository.ProductRepository;
 import com.minishop.minishopspring.repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -27,9 +25,9 @@ public class CartService {
 
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
-    private final UserRepository userRepository;
     private final CurrentUserService currentUserService;
 
+    @Transactional
     public CartItemResponseDTO addToCart(AddCartItemRequestDTO request) {
 
         User user = currentUserService.getCurrentUser();
@@ -81,7 +79,7 @@ public class CartService {
 
         return toResponseDTO(savedItem);
     }
-
+    @Transactional
     public CartItemResponseDTO updateQuantity(
             Long cartItemId,
             UpdateCartItemRequestDTO request
@@ -109,7 +107,7 @@ public class CartService {
 
         return toResponseDTO(savedItem);
     }
-
+    @Transactional
     public void removeItem(Long cartItemId) {
 
         User user = currentUserService.getCurrentUser();
@@ -122,7 +120,7 @@ public class CartService {
 
         cartItemRepository.delete(cartItem);
     }
-
+    @Transactional(readOnly = true)
     public CartResponseDTO getCart() {
 
         User user = currentUserService.getCurrentUser();
@@ -141,7 +139,6 @@ public class CartService {
 
         return new CartResponseDTO(items, total);
     }
-
 
     private CartItemResponseDTO toResponseDTO(CartItem item) {
 
