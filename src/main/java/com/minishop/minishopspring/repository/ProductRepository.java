@@ -20,6 +20,26 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     );
     Page<Product> findByCategory_Id(Integer categoryId, Pageable pageable);
 
+    Page<Product> findByActiveTrue(Pageable pageable);
+
+    Page<Product> findByNameContainingIgnoreCaseAndActiveTrue(
+            String keyword,
+            Pageable pageable
+    );
+
+    Page<Product> findByCategory_IdAndActiveTrue(
+            Integer categoryId,
+            Pageable pageable
+    );
+
+    Page<Product> findByNameContainingIgnoreCaseAndCategory_IdAndActiveTrue(
+            String keyword,
+            Integer categoryId,
+            Pageable pageable
+    );
+
+    Optional<Product> findByIdAndActiveTrue(Long id);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM Product p WHERE p.id = :id")
     Optional<Product> findByIdForUpdate(@Param("id") Long id);

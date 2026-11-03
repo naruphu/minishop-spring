@@ -107,7 +107,7 @@ public class ProductService {
         productRepository.delete(product);
     }
 
-    public Page<ProductResponseDTO> getProduct(int page, int size, String keyword, Integer categoryId){
+    public Page<ProductResponseDTO> getAllProductsForAdmin(int page, int size, String keyword, Integer categoryId){
         Page<Product> products;
         Pageable pageable = PageRequest.of(page, size);
 
@@ -148,6 +148,80 @@ public class ProductService {
 
         return products.map(productMapper::toDTO);
 
+    }
+
+    public Page<ProductResponseDTO> getActiveProducts(
+            int page,
+            int size,
+            String keyword,
+            Integer categoryId
+    ) {
+        Page<Product> products;
+        Pageable pageable = PageRequest.of(page, size);
+
+        if((keyword != null && !keyword.trim().isEmpty()) && categoryId != null){
+
+            products =
+                    productRepository
+                            .findByNameContainingIgnoreCaseAndCategory_IdAndActiveTrue(
+                                    keyword,
+                                    categoryId,
+                                    pageable
+                            );
+
+        } else if (keyword != null) {
+
+            products =
+                    productRepository
+                            .findByNameContainingIgnoreCaseAndActiveTrue(
+                                    keyword,
+                                    pageable
+                            );
+
+        } else if (categoryId != null) {
+
+            products =
+                    productRepository
+                            .findByCategory_IdAndActiveTrue(
+                                    categoryId,
+                                    pageable
+                            );
+
+        } else {
+
+            products =
+                    productRepository.findByActiveTrue(pageable);
+        }
+        return products.map(productMapper::toDTO);
+    }
+
+    public ProductResponseDTO setProductActive(Long id, boolean active) {
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() ->
+                        new ProductNotFoundException(
+                                "Product not found with id: " + id
+                        )
+                );
+
+        product.setActive(active);
+
+        Product savedProduct = productRepository.save(product);
+
+        return productMapper.toDTO(savedProduct);
+    }
+
+    public ProductResponseDTO getActiveProductById(Long id) {
+
+        Product product = productRepository
+                .findByIdAndActiveTrue(id)
+                .orElseThrow(() ->
+                        new ProductNotFoundException(
+                                "Product not found with id: " + id
+                        )
+                );
+
+        return productMapper.toDTO(product);
     }
 
 }

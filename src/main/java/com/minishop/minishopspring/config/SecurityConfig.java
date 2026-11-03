@@ -24,75 +24,98 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http
                 .csrf(csrf -> csrf.disable())
 
                 .sessionManagement(session ->
-                    session.sessionCreationPolicy(
-                            SessionCreationPolicy.STATELESS
-                    )
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
                 )
+
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers(
-                                        "/users/register",
-                                        "/users/login"
-                                ).permitAll()
 
-                                .requestMatchers(
-                                        "/users",
-                                        "/users/**"
-                                ).hasRole("ADMIN")
+                        // =========================
+                        // AUTH - PUBLIC
+                        // =========================
+                        .requestMatchers(
+                                "/users/register",
+                                "/users/login"
+                        ).permitAll()
 
-                                // Chỉ ADMIN được tạo product
-                                .requestMatchers(
-                                        HttpMethod.POST,
-                                        "/products/**"
-                                ).hasRole("ADMIN")
 
-                                // Chỉ ADMIN được sửa product
-                                .requestMatchers(
-                                        HttpMethod.PUT,
-                                        "/products/**"
-                                ).hasRole("ADMIN")
+                        // =========================
+                        // PRODUCT - PUBLIC
+                        // =========================
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/products",
+                                "/products/**"
+                        ).permitAll()
 
-                                // Chỉ ADMIN được xóa product
-                                .requestMatchers(
-                                        HttpMethod.DELETE,
-                                        "/products/**"
-                                ).hasRole("ADMIN")
 
-                                // Chỉ ADMIN được xem tất cả orders
-                                .requestMatchers(
-                                        HttpMethod.GET,
-                                        "/orders"
-                                ).hasRole("ADMIN")
+                        // =========================
+                        // ADMIN ROUTES
+                        // =========================
+                        .requestMatchers("/admin/**")
+                        .hasRole("ADMIN")
 
-                                .requestMatchers(
-                                        HttpMethod.PUT,
-                                        "/orders/*/status"
-                                ).hasRole("ADMIN")
 
-                                .requestMatchers(
-                                        HttpMethod.POST,
-                                        "/categories"
-                                ).hasRole("ADMIN")
+                        // =========================
+                        // USER MANAGEMENT - ADMIN
+                        // =========================
+                        .requestMatchers(
+                                "/users",
+                                "/users/**"
+                        ).hasRole("ADMIN")
 
-                                .requestMatchers(
-                                        HttpMethod.PUT,
-                                        "/categories/**"
-                                ).hasRole("ADMIN")
 
-                                .requestMatchers(
-                                        HttpMethod.DELETE,
-                                        "/categories/**"
-                                ).hasRole("ADMIN")
+                        // =========================
+                        // ORDER MANAGEMENT - ADMIN
+                        // =========================
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/orders"
+                        ).hasRole("ADMIN")
 
-                                .anyRequest()
-                                .authenticated()
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/orders/*/status"
+                        ).hasRole("ADMIN")
+
+
+                        // =========================
+                        // CATEGORY MANAGEMENT - ADMIN
+                        // =========================
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/categories"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/categories/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/categories/**"
+                        ).hasRole("ADMIN")
+
+
+                        // =========================
+                        // OTHER REQUESTS
+                        // =========================
+                        .anyRequest()
+                        .authenticated()
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                )
 
                 .build();
     }

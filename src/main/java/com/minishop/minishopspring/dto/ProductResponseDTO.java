@@ -13,4 +13,5 @@ public class ProductResponseDTO {
     private BigDecimal price;
     private Integer quantity;
     private String categoryName;
+    private Boolean active;
 }
