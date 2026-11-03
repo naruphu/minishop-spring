@@ -14,8 +14,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -222,6 +228,80 @@ public class ProductService {
                 );
 
         return productMapper.toDTO(product);
+    }
+
+    public ProductResponseDTO uploadProductImage(
+            Long productId,
+            MultipartFile file
+    ) {
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() ->
+                        new ProductNotFoundException(
+                                "Product not found with id: " + productId
+                        )
+                );
+
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Image file is empty");
+        }
+
+        String contentType = file.getContentType();
+
+        if (contentType == null ||
+                (!contentType.equals("image/jpeg")
+                        && !contentType.equals("image/png")
+                        && !contentType.equals("image/webp"))) {
+
+            throw new IllegalArgumentException(
+                    "Only JPG, PNG and WEBP images are allowed"
+            );
+        }
+
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new IllegalArgumentException(
+                    "Image size must not exceed 5MB"
+            );
+        }
+
+        String originalFilename = file.getOriginalFilename();
+
+        String extension = "";
+
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(
+                    originalFilename.lastIndexOf(".")
+            );
+        }
+
+        String fileName = UUID.randomUUID() + extension;
+
+        Path uploadPath = Paths.get("uploads/products");
+
+        try {
+
+            Files.createDirectories(uploadPath);
+
+            Path filePath = uploadPath.resolve(fileName);
+
+            file.transferTo(filePath);
+
+        } catch (IOException e) {
+
+            throw new RuntimeException(
+                    "Could not save image file",
+                    e
+            );
+        }
+
+        String imageUrl = "/uploads/products/" + fileName;
+
+        product.setImageUrl(imageUrl);
+
+        Product savedProduct =
+                productRepository.save(product);
+
+        return productMapper.toDTO(savedProduct);
     }
 
 }

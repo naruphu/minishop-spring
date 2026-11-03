@@ -55,6 +55,8 @@ public class SecurityConfig {
                                 "/products/**"
                         ).permitAll()
 
+                        .requestMatchers("/uploads/**").permitAll()
+
 
                         // =========================
                         // ADMIN ROUTES

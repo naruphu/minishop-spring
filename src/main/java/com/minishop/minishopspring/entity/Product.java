@@ -23,6 +23,8 @@ public class Product {
     private Category category;
     @Column(nullable = false)
     private Boolean active = true;
+    @Column(name = "image_url")
+    private String imageUrl;
 
     public Product(BigDecimal price, String name, Integer quantity) {
         this.price = price;

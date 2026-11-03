@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/admin/products")
@@ -92,5 +93,17 @@ public class AdminProductController {
         productService.deleteProduct(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/image")
+    public ResponseEntity<ProductResponseDTO> uploadImage(
+            @PathVariable Long id,
+            @RequestParam("image") MultipartFile file
+    ) {
+
+        ProductResponseDTO product =
+                productService.uploadProductImage(id, file);
+
+        return ResponseEntity.ok(product);
     }
 }
