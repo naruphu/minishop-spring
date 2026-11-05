@@ -32,7 +32,7 @@ public class CartService {
 
         User user = currentUserService.getCurrentUser();
 
-        Product product = productRepository.findById(request.getProductId())
+        Product product = productRepository.findByIdAndActiveTrue(request.getProductId())
                 .orElseThrow(() ->
                         new ProductNotFoundException(
                                 "Product not found with id: " + request.getProductId()
@@ -92,6 +92,12 @@ public class CartService {
                 .orElseThrow(() ->
                         new CartException("Cart item not found")
                 );
+
+        if (!Boolean.TRUE.equals(cartItem.getProduct().getActive())) {
+            throw new CartException(
+                    "Product is no longer available"
+            );
+        }
 
         if (request.getQuantity() > cartItem.getProduct().getQuantity()) {
             throw new CartException(

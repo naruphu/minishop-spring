@@ -18,6 +18,7 @@ public class CheckoutController {
 
     @PostMapping
     public ResponseEntity<OrderResponseDTO> checkout() {
+        System.out.println(">>> ENTER CHECKOUT CONTROLLER");
 
         OrderResponseDTO response =
                 checkoutService.checkout();

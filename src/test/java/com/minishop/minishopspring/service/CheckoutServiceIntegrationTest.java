@@ -185,4 +185,71 @@ class CheckoutServiceIntegrationTest extends BaseIntegrationTest {
 
 
     }
+
+    @Test
+    void shouldRejectCheckoutWhenProductIsInactive() {
+        // ARRANGE
+        User john = new User();
+        john.setUsername("john");
+        john.setEmail("john@gmail.com");
+        john.setPassword("123456");
+        john.setRole(Role.CUSTOMER);
+
+        john = userRepository.save(john);
+
+        Product iphone = new Product();
+        iphone.setName("iPhone 16");
+        iphone.setPrice(new BigDecimal("20000000"));
+        iphone.setQuantity(10);
+        iphone.setActive(false);
+
+        iphone = productRepository.save(iphone);
+
+        CartItem cartItem =
+                new CartItem(john, iphone, 3);
+
+        cartItemRepository.save(cartItem);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        when(currentUserService.getCurrentUser())
+                .thenReturn(john);
+
+        // ACT
+        CartException exception = assertThrows(
+                CartException.class,
+                () -> checkoutService.checkout()
+        );
+
+        assertEquals("Product is no longer available: " + iphone.getName(), exception.getMessage());
+
+        // ASSERT 1: Không tạo Order
+            List<Order> orders =
+                    orderRepository.findByUserId(john.getId());
+
+            assertTrue(orders.isEmpty());
+
+
+        // ASSERT 2: Stock không thay đổi
+            Product updatedProduct = productRepository
+                    .findById(iphone.getId())
+                    .orElseThrow();
+
+            assertEquals(10, updatedProduct.getQuantity());
+
+
+        // ASSERT 3: CartItem vẫn tồn tại
+            List<CartItem> remainingCartItems =
+                    cartItemRepository.findByUserId(john.getId());
+
+            assertEquals(1, remainingCartItems.size());
+
+            assertEquals(
+                    3,
+                    remainingCartItems.get(0).getQuantity()
+            );
+    }
+
+
 }

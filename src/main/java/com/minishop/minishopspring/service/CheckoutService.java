@@ -52,6 +52,12 @@ public class CheckoutService {
                             new ProductNotFoundException("Product not found")
                     );
 
+            // Kiểm tra sản phẩm còn được bán không
+            if (!Boolean.TRUE.equals(product.getActive())) {
+                throw new CartException(
+                        "Product is no longer available: " + product.getName()
+                );
+            }
 
             if (cartItem.getQuantity() > product.getQuantity()) {
                 throw new CartException(
@@ -105,7 +111,6 @@ public class CheckoutService {
 
         cartItemRepository.deleteAll(cartItems);
 
-        // còn thiếu đúng đoạn này
         return orderMapper.toResponseDTO(savedOrder);
     }
 

@@ -40,8 +40,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Optional<Product> findByIdAndActiveTrue(Long id);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT p FROM Product p WHERE p.id = :id")
+    @Query(
+            value = "SELECT * FROM product WHERE id = :id FOR UPDATE",
+            nativeQuery = true
+    )
     Optional<Product> findByIdForUpdate(@Param("id") Long id);
 
 }
